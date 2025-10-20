@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
-import { PublisherController } from './publisher/publisher.controller';
-import { AppService } from './app.service';
+import { QueueModule } from './queue/queue.module';
+import { PublisherModule } from './publisher/publisher.module';
 
 @Module({
-  imports: [],
-  controllers: [PublisherController],
-  providers: [AppService],
+  imports: [QueueModule, PublisherModule],
 })
 export class AppModule {}
