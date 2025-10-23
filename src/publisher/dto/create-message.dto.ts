@@ -1,3 +1,11 @@
+import {
+  IsString,
+  IsEnum,
+  IsDate,
+  IsOptional,
+  IsNotEmpty,
+} from 'class-validator';
+
 export enum MessageType {
   DAILY_LOG = 'daily_log',
   STATUS_UPDATE = 'status_update',
@@ -13,9 +21,23 @@ export enum Priority {
 }
 
 export class CreateMessageDto {
+  @IsNotEmpty()
+  @IsString()
   readonly message: string;
+
+  @IsEnum(MessageType)
+  @IsNotEmpty()
   readonly type: MessageType;
+
+  @IsString()
+  @IsOptional()
   readonly location?: string;
+
+  @IsEnum(Priority)
+  @IsOptional()
   readonly priority?: Priority;
+
+  @IsDate()
+  @IsOptional()
   readonly timestamp?: Date;
 }
