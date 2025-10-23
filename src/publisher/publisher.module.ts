@@ -3,7 +3,7 @@ import { PublisherController } from './publisher.controller';
 import { QueueModule } from '../queue/queue.module';
 
 @Module({
-  imports: [QueueModule],
+  imports: [QueueModule.forRootAsync()],
   controllers: [PublisherController],
 })
 export class PublisherModule {}

@@ -1,27 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+// import { Injectable } from '@nestjs/common';
+// import { ConfigService } from '@nestjs/config';
 
-import { QueueProvider } from './queue.interface';
-import { InMemoryQueueService } from './providers/in-memory.provider';
+// import { QueueProvider } from './queue.interface';
+// import { InMemoryQueueService } from './providers/in-memory.provider';
+// import { RabbitMQService } from './providers/rabbitmq.service';
 
-@Injectable()
-export class QueueService implements QueueProvider {
-  private provider: QueueProvider;
+// const providerMap: Record<string, new () => QueueProvider> = {
+//   //   SQS: SqsQueueService,
+//   RABBITMQ: RabbitMQService,
+//   INMEMORY: InMemoryQueueService,
+// };
 
-  constructor(private readonly configService: ConfigService) {
-    const type =
-      this.configService.get<string>('QUEUE_PROVIDER') || 'in-memory';
+// @Injectable()
+// export class QueueService implements QueueProvider {
+//   private provider: QueueProvider;
 
-    if (type === 'in-memory') {
-      this.provider = new InMemoryQueueService();
-    }
-  }
+//   constructor(private readonly configService: ConfigService) {
+//     if (!this.configService.get<string>('QUEUE_PROVIDER')) {
+//       throw new Error('QUEUE_PROVIDER is not set');
+//     }
 
-  async publish(message: any): Promise<void> {
-    return this.provider.publish(message);
-  }
+//     const providerName =
+//       this.configService.get<string>('QUEUE_PROVIDER') || 'INMEMORY';
 
-  async subscribe(handler: (message: any) => void): Promise<void> {
-    return this.provider.subscribe(handler);
-  }
-}
+//     this.provider = new providerMap[providerName]();
+//   }
+
+//   async publish(message: any): Promise<void> {
+//     return this.provider.publish(message);
+//   }
+
+//   async subscribe(handler: (message: any) => void): Promise<void> {
+//     return this.provider.subscribe(handler);
+//   }
+// }
