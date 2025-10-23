@@ -19,7 +19,7 @@ export class QueueModule {
 
             switch (provider.toUpperCase()) {
               case 'SQS':
-                return new SQSQueueService();
+                return new SQSQueueService(configService);
               case 'RABBITMQ':
                 return new RabbitMQService(configService);
               default:

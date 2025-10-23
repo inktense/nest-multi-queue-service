@@ -72,7 +72,9 @@ export class RabbitMQService
     }
   }
 
-  async subscribe(handler?: (message: any) => void): Promise<void> {
+  async subscribe(): Promise<void> {
     console.log('[RabbitMQ] Subscribing to queue...');
+    // TODO: Implement RabbitMQ subscription logic
+    return Promise.resolve();
   }
 }

@@ -5,4 +5,16 @@ services:
     ports:
       - "5672:5672" # AMQP
       - "15672:15672" # Web UI console
-    
+  
+  sqs:
+    image: localstack/localstack
+    container_name: sqs
+    command: ["sh", "-c", "/etc/localstack/init/ready.d/create-sqs-queue.sh && exec \"$@\""]
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - "./scripts:/etc/localstack/init/ready.d"
+    ports:
+      - "4566:4566" # LocalStack main port (SQS, S3, etc.)
