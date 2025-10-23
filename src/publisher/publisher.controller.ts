@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Inject } from '@nestjs/common';
 import { QUEUE_PROVIDER, QUEUE_SERVICE } from '../queue/constants';
 import type { IQueueService } from '../queue/interfaces/queue.interface';
+import { CreateMessageDto } from './dto/create-message.dto';
 
 @Controller('publish')
 export class PublisherController {
@@ -12,13 +13,13 @@ export class PublisherController {
   }
 
   @Post()
-  async publish(@Body() createPublisherDto: any) {
+  async publish(@Body() createMessageDto: CreateMessageDto) {
     console.log(`Publishing message via ${this.provider} provider...`);
-    await this.queueService.publish(createPublisherDto);
+    await this.queueService.publish(createMessageDto);
     return {
       status: 'Message published',
       provider: this.provider,
-      message: createPublisherDto,
+      message: createMessageDto,
     };
   }
 }

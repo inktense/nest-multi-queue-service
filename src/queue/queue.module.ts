@@ -21,7 +21,7 @@ export class QueueModule {
               case 'SQS':
                 return new SQSQueueService();
               case 'RABBITMQ':
-                return new RabbitMQService();
+                return new RabbitMQService(configService);
               default:
                 throw new Error(
                   `Unknown queue provider: ${provider}. Valid options: SQS, RABBITMQ`,

@@ -1,10 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import client, { Connection, Channel } from 'amqplib';
+import { ConfigService } from '@nestjs/config';
 import { IQueueService } from '../interfaces/queue.interface';
 
 @Injectable()
-export class RabbitMQService implements IQueueService {
+export class RabbitMQService
+  implements IQueueService, OnModuleInit, OnModuleDestroy
+{
+  private connection: Connection;
+  private channel: Channel;
+  private readonly queueName: string;
+  private readonly connectionUrl: string;
+
+  constructor(private configService: ConfigService) {
+    if (!this.configService.get<string>('RABBITMQ_URL')) {
+      throw new Error('RABBITMQ_URL is not set');
+    }
+
+    if (!this.configService.get<string>('RABBITMQ_QUEUE')) {
+      throw new Error('RABBITMQ_QUEUE is not set');
+    }
+
+    this.connectionUrl = this.configService.get<string>('RABBITMQ_URL') || '';
+    this.queueName = this.configService.get<string>('RABBITMQ_QUEUE') || '';
+  }
+
+  async onModuleInit() {
+    await this.connect();
+  }
+
+  async onModuleDestroy() {
+    await this.disconnect();
+  }
+  private async connect(): Promise<void> {
+    try {
+      console.log('[RabbitMQ] Connecting to:', this.connectionUrl);
+      this.connection = await client.connect(this.connectionUrl);
+      this.channel = await this.connection.createChannel();
+
+      // Assert queue exists (create if not)
+      await this.channel.assertQueue(this.queueName, {
+        durable: true, // Queue survives broker restart
+      });
+
+      console.log(`[RabbitMQ] Connected and queue '${this.queueName}' ready`);
+    } catch (error) {
+      console.error('[RabbitMQ] Connection failed:', error);
+      throw error;
+    }
+  }
+
+  private async disconnect(): Promise<void> {
+    try {
+      await this.channel?.close();
+      await this.connection?.close();
+      console.log('[RabbitMQ] Disconnected');
+    } catch (error) {
+      console.error('[RabbitMQ] Error during disconnect:', error.message);
+    }
+  }
   async publish(message: any): Promise<void> {
-    console.log('[RabbitMQ] Publishing message:', message);
+    try {
+      const messageBuffer = Buffer.from(JSON.stringify(message));
+
+      await this.channel.sendToQueue(this.queueName, messageBuffer, {
+        persistent: true, // Message survives broker restart
+      });
+    } catch (error) {
+      console.error('[RabbitMQ] Publish failed:', error);
+      throw error;
+    }
   }
 
   async subscribe(handler?: (message: any) => void): Promise<void> {
