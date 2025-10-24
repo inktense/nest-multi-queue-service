@@ -42,7 +42,6 @@ export class SQSQueueService
       },
     };
 
-    // Add endpoint if provided (for LocalStack)
     if (this.endpoint) {
       config.endpoint = this.endpoint;
     }
