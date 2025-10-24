@@ -3,6 +3,8 @@ import {
   SQSClient,
   SendMessageCommand,
   GetQueueAttributesCommand,
+  ReceiveMessageCommand,
+  DeleteMessageCommand,
 } from '@aws-sdk/client-sqs';
 import { ConfigService } from '@nestjs/config';
 import { IQueueService } from '../interfaces/queue.interface';
@@ -109,8 +111,52 @@ export class SQSQueueService
   }
 
   async subscribe(): Promise<void> {
-    console.log('[SQS] Subscribing to queue...');
-    // TODO: Implement SQS subscription logic
-    return Promise.resolve();
+    console.log('[SQS] Starting subscription to queue...');
+
+    if (!this.sqsClient) {
+      throw new Error('SQS client not initialized');
+    }
+
+    const receiveMessage = async () => {
+      try {
+        const command = new ReceiveMessageCommand({
+          QueueUrl: this.queueUrl,
+          MaxNumberOfMessages: 10,
+          WaitTimeSeconds: 20,
+          MessageAttributeNames: ['All'],
+        });
+
+        const response = await this.sqsClient.send(command);
+
+        if (response.Messages && response.Messages.length > 0) {
+          console.log(`[SQS] Received ${response.Messages.length} messages`);
+
+          for (const message of response.Messages) {
+            try {
+              const messageBody = JSON.parse(message.Body || '{}');
+              console.log('[SQS] Received message:', messageBody);
+
+              if (message.ReceiptHandle) {
+                const deleteCommand = new DeleteMessageCommand({
+                  QueueUrl: this.queueUrl,
+                  ReceiptHandle: message.ReceiptHandle,
+                });
+                await this.sqsClient.send(deleteCommand);
+                console.log('[SQS] Message processed and deleted');
+              }
+            } catch (error) {
+              console.error('[SQS] Error processing message:', error);
+            }
+          }
+        }
+
+        setTimeout(receiveMessage, 1000);
+      } catch (error) {
+        console.error('[SQS] Error receiving messages:', error);
+        setTimeout(receiveMessage, 5000);
+      }
+    };
+
+    receiveMessage();
   }
 }

@@ -70,6 +70,10 @@ Choose which queue provider to use with the convenient npm scripts.
 
 5. **Test the API:**
    ```bash
+   # Start subscription to process messages
+   curl -X POST http://localhost:3000/subscribe
+   
+   # Publish a message
    curl -X POST http://localhost:3000/publish \
      -H "Content-Type: application/json" \
      -d '{
@@ -99,6 +103,10 @@ Run two instances of the application simultaneously, each using a different queu
 
 3. **Test both providers:**
    ```bash
+   # Start subscriptions for both apps
+   curl -X POST http://localhost:3001/subscribe  # SQS
+   curl -X POST http://localhost:3002/subscribe  # RabbitMQ
+   
    # Test SQS app
    curl -X POST http://localhost:3001/publish \
      -H "Content-Type: application/json" \
@@ -190,6 +198,49 @@ npm run test:watch
 
 ## 📚 API Endpoints
 
+### Publisher Endpoints
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/publish` | Publish a message to the configured queue |
+
+### Subscriber Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/subscribe` | Start subscription to process messages from the queue |
+
+## 🔄 Message Processing
+
+### How It Works
+
+1. **Subscribe**: Start message processing using the `/subscribe` endpoint
+2. **Publish**: Send messages to the queue using the `/publish` endpoint
+3. **Process**: Messages are automatically logged to console by the queue services
+
+### Message Flow
+
+```
+Publisher → Queue (SQS/RabbitMQ) → Subscriber → Processing Logic
+```
+
+### Example Workflow
+
+```bash
+# 1. Start subscription to process messages
+curl -X POST http://localhost:3000/subscribe
+
+# 2. Publish messages (they will be logged to console automatically)
+curl -X POST http://localhost:3000/publish \
+  -H "Content-Type: application/json" \
+  -d '{"message": "All systems operational", "type": "status_update"}'
+
+curl -X POST http://localhost:3000/publish \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Solar flare detected", "type": "emergency", "priority": "high"}'
+```
+
+### Queue Behavior
+
+- **SQS**: Uses long polling (20s) with automatic message deletion after processing
+- **RabbitMQ**: Uses manual acknowledgment with automatic requeue on errors
+- **Error Handling**: Failed messages are retried automatically
+- **Logging**: All received messages are logged to console

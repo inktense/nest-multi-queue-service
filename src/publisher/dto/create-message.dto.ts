@@ -4,6 +4,7 @@ import {
   IsDate,
   IsOptional,
   IsNotEmpty,
+  MaxLength,
 } from 'class-validator';
 
 export enum MessageType {
@@ -23,6 +24,7 @@ export enum Priority {
 export class CreateMessageDto {
   @IsNotEmpty()
   @IsString()
+  @MaxLength(1000)
   readonly message: string;
 
   @IsEnum(MessageType)

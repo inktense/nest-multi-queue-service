@@ -73,8 +73,31 @@ export class RabbitMQService
   }
 
   async subscribe(): Promise<void> {
-    console.log('[RabbitMQ] Subscribing to queue...');
-    // TODO: Implement RabbitMQ subscription logic
-    return Promise.resolve();
+    console.log('[RabbitMQ] Starting subscription to queue...');
+
+    if (!this.channel) {
+      throw new Error('RabbitMQ channel not initialized');
+    }
+
+    await this.channel.consume(
+      this.queueName,
+      async (msg) => {
+        if (msg) {
+          try {
+            const messageContent = JSON.parse(msg.content.toString());
+            console.log('[RabbitMQ] Received message:', messageContent);
+            this.channel.ack(msg);
+            console.log('[RabbitMQ] Message processed and acknowledged');
+          } catch (error) {
+            console.error('[RabbitMQ] Error processing message:', error);
+            this.channel.nack(msg, false, true);
+            console.log('[RabbitMQ] Message rejected and requeued');
+          }
+        }
+      },
+      { noAck: false },
+    );
+
+    console.log('[RabbitMQ] Consumer started successfully');
   }
 }
