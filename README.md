@@ -4,21 +4,21 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-A flexible NestJS application that supports multiple queue providers (SQS, RabbitMQ, In-Memory) with the ability to run different providers simultaneously using Docker containers.
+A flexible NestJS application that supports multiple queue providers (SQS, RabbitMQ) with the ability to run different providers simultaneously using Docker containers.
 
 ## 📋 Prerequisites
 
 - **Node.js** 18+ (use `.nvmrc` for version management)
 - **Docker** & **Docker Compose**
-- **npm** or **yarn**
+- **npm** 
+- **Localstack**
 
 ## 🏗️ Architecture
 
 This project provides a pluggable queue system that can work with:
 
-- **AWS SQS** (via LocalStack for development)
+- **AWS SQS** (via LocalStack)
 - **RabbitMQ** 
-- **In-Memory** (for testing)
 
 ## 📦 Message Structure
 
@@ -38,7 +38,7 @@ Messages follow this structure:
 
 ### Option 1: Single Queue Provider
 
-Choose which queue provider to use by setting the `QUEUE_PROVIDER` environment variable.
+Choose which queue provider to use with the convenient npm scripts.
 
 #### Quick Start:
 
@@ -47,21 +47,20 @@ Choose which queue provider to use by setting the `QUEUE_PROVIDER` environment v
    docker-compose up rabbitmq sqs -d
    ```
 
-2. **Set up environment:**
-   ```bash
-   # Copy environment template
-   cp .env.example .env
-   
-   # Edit .env and set your preferred provider
-   QUEUE_PROVIDER=SQS  # or RABBITMQ
-   ```
-
-3. **Install dependencies and start:**
+2. **Install dependencies:**
    ```bash
    npm run check-node-version
    nvm use
    npm install
-   npm run start
+   ```
+
+3. **Start with your preferred provider:**
+   ```bash
+   # Start with SQS
+   npm run start:sqs
+   
+   # OR start with RabbitMQ
+   npm run start:rabbitmq
    ```
 
 4. **Wait for startup:**
@@ -89,6 +88,8 @@ Run two instances of the application simultaneously, each using a different queu
 
 1. **Start all services:**
    ```bash
+   npm run docker:dual
+   # OR
    docker-compose up --build
    ```
 
@@ -146,18 +147,14 @@ docker exec sqs awslocal sqs list-queues
 npm test
 ```
 
-### Run Integration Tests
+### Run Tests with Coverage
 ```bash
-npm run test:e2e
+npm run test:cov
 ```
 
-### Test Scripts
+### Run Tests in Watch Mode
 ```bash
-# Test dual container setup
-./scripts/test-dual-containers.sh
-
-# Test multi-provider setup  
-./scripts/test-multi-provider.sh
+npm run test:watch
 ```
 
 ## 🐳 Docker Services
@@ -169,13 +166,24 @@ npm run test:e2e
 | `app-sqs` | 3001 | NestJS app using SQS |
 | `app-rabbitmq` | 3002 | NestJS app using RabbitMQ |
 
+## 📜 Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run start:sqs` | Start app with SQS configuration |
+| `npm run start:rabbitmq` | Start app with RabbitMQ configuration |
+| `npm run docker:dual` | Start dual container setup |
+| `npm test` | Run unit tests |
+| `npm run test:cov` | Run tests with coverage |
+
+
 ## 🔧 Configuration
 
 ### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `QUEUE_PROVIDER` | Queue provider (SQS/RABBITMQ/IN_MEMORY) | `SQS` |
+| `QUEUE_PROVIDER` | Queue provider (SQS/RABBITMQ) | `SQS` |
 | `AWS_ENDPOINT` | SQS endpoint (for LocalStack) | `http://localhost:4566` |
 | `RABBITMQ_URL` | RabbitMQ connection URL | `amqp://guest:guest@localhost:5672` |
 | `PORT` | Application port | `3000` |
