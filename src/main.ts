@@ -6,7 +6,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
 
-  // Starts listening for shutdown hooks
   app.enableShutdownHooks();
 
   await app.listen(process.env.PORT ?? 3000);
@@ -17,6 +16,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error('❌ Error starting application:', error);
+  console.error('Error starting application:', error);
   process.exit(1);
 });

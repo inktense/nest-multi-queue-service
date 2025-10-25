@@ -49,9 +49,10 @@ Choose which queue provider to use with the convenient npm scripts.
 
 2. **Install dependencies:**
    ```bash
+   npm install
+   nvm install
    npm run check-node-version
    nvm use
-   npm install
    ```
 
 3. **Start with your preferred provider:**
@@ -68,7 +69,7 @@ Choose which queue provider to use with the convenient npm scripts.
    🚀 Application is running on: http://localhost:3000
    ```
 
-5. **Test the API:**
+5. **Test the API: (Or use Postman if more convenient)**
    ```bash
    # Start subscription to process messages
    curl -X POST http://localhost:3000/subscribe
@@ -97,7 +98,7 @@ Run two instances of the application simultaneously, each using a different queu
    docker-compose up --build
    ```
 
-2. **Access the applications:**
+2. **App URLs:**
    - **SQS App**: http://localhost:3001
    - **RabbitMQ App**: http://localhost:3002
 
@@ -119,6 +120,8 @@ Run two instances of the application simultaneously, each using a different queu
    ```
 
 ## 🔍 Monitoring & Debugging
+
+**IMPORTANT**: When subscribing to a queue the messages will be visible in the application logs and deleted from the queue. You won't be able to see them in the console. 
 
 ### RabbitMQ Console
 - **URL**: http://localhost:15672
